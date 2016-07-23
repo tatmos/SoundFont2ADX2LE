@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System;
+using System.Security;
 
 public class MakeAtomCraftData : MonoBehaviour
 {
@@ -186,6 +187,7 @@ public class MakeAtomCraftData : MonoBehaviour
 
     void CreateTrackXML(StreamWriter sw, string workunitName, string materialName, bool loopFlag, int pitch, int pan)
     {
+
         sw.WriteLine("              <Orca OrcaName=\"Track_" + materialName + "\" SynthType=\"Track\" Pitch=\"" + pitch + "\" SwitchRange=\"0.5\" DisplayUnit=\"Frame5994\" ObjectColor=\"30, 200, 100, 180\" OrcaType=\"CriMw.CriAtomCraft.AcCore.AcOoCueSynthTrack\">");
 
         string acOoCueSynthWaveformStr = "                <Orca OrcaName=\"" + materialName + ".wav\" ";
@@ -198,8 +200,11 @@ public class MakeAtomCraftData : MonoBehaviour
 
         acOoCueSynthWaveformStr += "Pan3dAngle=\"" + pan.ToString() + "\" ";
 
-        acOoCueSynthWaveformStr += "LinkWaveform=\"/MaterialRootFolder/" + materialName + ".wav\" "
-        + " PanType=\"Auto\" OrcaType=\"CriMw.CriAtomCraft.AcCore.AcOoCueSynthWaveform\" />";
+        ///CriAtomCraftV2Root/WorkUnits/CheapChip_MaterialInfo/
+        acOoCueSynthWaveformStr += "LinkWaveform=\"CriAtomCraftV2Root/WorkUnits/" + workunitName + "_MaterialInfo/MaterialRootFolder/" + materialName + ".wav\" "
+        //  Pan3D or Auto
+        //+ " PanType=\"Auto\"";
+        + " OrcaType=\"CriMw.CriAtomCraft.AcCore.AcOoCueSynthWaveform\" />";
         
         sw.WriteLine(acOoCueSynthWaveformStr);
 

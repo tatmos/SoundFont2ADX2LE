@@ -406,6 +406,19 @@ public class SF2ADX2LE : MonoBehaviour
     {
         SfToAdx2ConvMain();
     }
+
+    /// <summary>
+    /// 音色名でXMLで使用できない文字を変換　"エスケープ対象：　<　>　&　\"　\'"
+    /// </summary>
+    string XmlEscapeConvert(string name)
+    {
+        name = name.Replace("<","_");
+        name = name.Replace(">","_");
+        name = name.Replace("&","_");
+        name = name.Replace("\"","_");
+        name = name.Replace("\'","_");
+        return name;
+    }
         
     void SfToAdx2ConvMain()
     {
@@ -432,7 +445,7 @@ public class SF2ADX2LE : MonoBehaviour
             if (shdr.dwEnd == 0)
                 continue;
 
-            string filePath = outputPath + shdr.achSampleName + ".wav";
+            string filePath = outputPath + XmlEscapeConvert(shdr.achSampleName) + ".wav";
             wavefilePathList.Add(filePath);
 
             if ((int)(shdr.dwStartloop) > 0)
@@ -649,7 +662,7 @@ public class SF2ADX2LE : MonoBehaviour
 
                                                             zone.name = newCueSheet.cueSheetName;
                                                             if(zone.sampleId >= 0){
-                                                                zone.sampleFileName = shdrList[zone.sampleId].achSampleName;
+                                                                zone.sampleFileName = XmlEscapeConvert(shdrList[zone.sampleId].achSampleName);
 
                                                                 newCueSheet.zoneList.Add(zone);
                                                             }
@@ -816,6 +829,8 @@ public class SF2ADX2LE : MonoBehaviour
                             {
                                 shdr.achSampleName = shdr.achSampleName.Remove(endStr);
                             }
+
+                            shdr.achSampleName = XmlEscapeConvert(shdr.achSampleName);
                         }
 
                         buf = new byte[26];
