@@ -17,9 +17,8 @@ public class SF2ADX2LE : MonoBehaviour
         RomMonoSample = 0x8001,
         RomRightSample = 0x8002,
         RomLeftSample = 0x8004,
-        RomLinkedSample = 0x8008}
-
-    ;
+        RomLinkedSample = 0x8008
+    };
 
     class sfSample
     {
@@ -399,11 +398,24 @@ public class SF2ADX2LE : MonoBehaviour
 
 
     public string inputSfPath = "SF/Famicom.sf2";
-    string outputpath = "output_wav";
+    string outputpathName = "output_wav";
     // Use this for initialization
+
+
     void Start()
     {
-        DebugWrite.DebugWriteTextReset(Path.GetDirectoryName(Application.dataPath) + "/" + "output_wav/");
+        SfToAdx2ConvMain();
+    }
+        
+    void SfToAdx2ConvMain()
+    {
+        string outputPath = Path.GetDirectoryName(Application.dataPath) + "/" + outputpathName + "/";
+        DebugWrite.DebugWriteTextReset(outputPath);
+
+        if(Directory.Exists(outputPath) == false)
+        {
+            Directory.CreateDirectory(outputPath);
+        }
 
         string inputPath = Path.GetDirectoryName(Application.dataPath) + "/" + inputSfPath;
 
@@ -420,7 +432,7 @@ public class SF2ADX2LE : MonoBehaviour
             if (shdr.dwEnd == 0)
                 continue;
 
-            string filePath = Path.GetDirectoryName(Application.dataPath) + "/" + outputpath + "/" + shdr.achSampleName + ".wav";
+            string filePath = outputPath + shdr.achSampleName + ".wav";
             wavefilePathList.Add(filePath);
 
             if ((int)(shdr.dwStartloop) > 0)
@@ -666,19 +678,15 @@ public class SF2ADX2LE : MonoBehaviour
         MakeAtomCraftData makeAtomCraftData = this.gameObject.AddComponent<MakeAtomCraftData>();
 
 
-        string matelialsPath = Path.GetDirectoryName(Application.dataPath) + outputpath;
+        string matelialsPath = outputPath;
 
         makeAtomCraftData.Make(Path.GetDirectoryName(inputPath), workUnitName, cueSheetList, wavefilePathList, matelialsPath);
 
         #endregion
     }
 
-    void Update()
-    {
-	
-    }
-        
 
+    //----
     void ReadSf2(string path)
     {
 

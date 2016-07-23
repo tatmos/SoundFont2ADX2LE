@@ -24,6 +24,8 @@ public class MakeAtomCraftData : MonoBehaviour
         CopyMaterialsFolder(outputPath, workunitName, fileList.ToArray(), srcMaterialsFolder);
 
         Debug.Log("<color=orange>Make Atom Craft Data Finish!</color> " + outputPath);
+
+
     }
 
     void MakeWorkUnit(string outputPath, string workunitName, List<SF2ADX2LE.Adx2CueSheet> cueSheetList, List<string> wavList)
