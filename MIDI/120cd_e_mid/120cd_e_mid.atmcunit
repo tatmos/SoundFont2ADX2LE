@@ -8,11 +8,12 @@
       </Orca>
       <Orca OrcaName="CueSheetFolder" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoCueSheetFolder">
         <Orca OrcaName="120cd_e_mid" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoCueSheetSubFolder">
-          <Orca OrcaName="Midi" Expand="True" OoUniqId="b0360d43-c14d-438d-9569-38ba1015952a" CueSheetPaddingSize="2048" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoCueSheet">
+          <Orca OrcaName="Midi" Expand="True" OoUniqId="f2086284-a506-4739-860b-c60bb758be84" CueSheetPaddingSize="2048" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoCueSheet">
           <Orca OrcaName="Cue_Note" CueID="1000" SynthType="SynthPolyphonic" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoCueSynthCue">
             <Orca OrcaName="Callback" CallbackId="0" CallbackTag="60" EventStartTime="0" EventEnableFlag="True" EventEndTime="0" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoEventCallback" />
-            <Orca OrcaName="Callback" CallbackId="0" CallbackTag="62" EventStartTime="500" EventEnableFlag="True" EventEndTime="0" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoEventCallback" />
-            <Orca OrcaName="Callback" CallbackId="0" CallbackTag="64" EventStartTime="1500" EventEnableFlag="True" EventEndTime="0" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoEventCallback" />
+            <Orca OrcaName="Callback" CallbackId="0" CallbackTag="62" EventStartTime="414" EventEnableFlag="True" EventEndTime="0" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoEventCallback" />
+            <Orca OrcaName="Callback" CallbackId="0" CallbackTag="131" EventStartTime="465" EventEnableFlag="True" EventEndTime="0" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoEventCallback" />
+            <Orca OrcaName="Callback" CallbackId="0" CallbackTag="0" EventStartTime="519" EventEnableFlag="True" EventEndTime="0" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoEventCallback" />
       <Orca OrcaName="Track" ObjectColor="200, 40, 120, 200" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoCueSynthTrack" />
           </Orca>
           </Orca>

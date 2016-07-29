@@ -12,6 +12,8 @@ public class MIDI2ADX2LE : MonoBehaviour
 
     List<MidiInfo> midiInfoList = new List<MidiInfo>();
 
+    int lastState = 0;
+
     // Use this for initialization
     void Start()
     {	
@@ -173,8 +175,15 @@ public class MIDI2ADX2LE : MonoBehaviour
 
                 int data = buf [readPoint++];
 
+                //  ランニングステータスチェック
+                if(data <= 0x7F)
+                {
+                    data = lastState;   // 最後のステートで処理する
+                }
+
                 if (data == 0xFF)
                 {
+                    lastState = data;
                     //  メタイベント
                     int eventType = buf [readPoint++];
 
@@ -248,8 +257,10 @@ public class MIDI2ADX2LE : MonoBehaviour
                             eventLength--;
                         }
                     }
-                } else if ((data & 0xF0) == 0x90)
+                } 
+                else if ((data & 0xF0) == 0x90)
                 {
+                    lastState = data;
                     //  note on
                     int ch = (data & 0x0F);
                     int note = buf [readPoint++];
@@ -262,6 +273,7 @@ public class MIDI2ADX2LE : MonoBehaviour
 
                 } else if ((data & 0xF0) == 0x80)
                 {
+                    lastState = data;
                     //  note off
                     int ch = (data & 0x0F);
                     int note = buf [readPoint++];
@@ -269,6 +281,7 @@ public class MIDI2ADX2LE : MonoBehaviour
                     DebugWrite.DebugWriteText(string.Format("time:{0:00000000} Note Off ch : {1} note : {2} vel : {3} ", ((float)time/(float)resolution*(float)tempo/1000f), ch, note, vel));
                 } else if ((data & 0xF0) == 0xB0)
                 {
+                    lastState = data;
                     //  ctrl change
                     int ch = (data & 0x0F);
                     int cc = buf [readPoint++];
