@@ -577,7 +577,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b72b9a2b24fda47d4a58f2ea69bfa31d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  midiFilePath: MIDI/120cd_e.mid
+  midiFilePath: MIDI/siokarabushi.mid
+  tempo: 1500000
+  resolution: 480
 --- !u!1 &1310085089
 GameObject:
   m_ObjectHideFlags: 0

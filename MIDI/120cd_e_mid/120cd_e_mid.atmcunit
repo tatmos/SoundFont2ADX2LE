@@ -8,13 +8,11 @@
       </Orca>
       <Orca OrcaName="CueSheetFolder" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoCueSheetFolder">
         <Orca OrcaName="120cd_e_mid" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoCueSheetSubFolder">
-          <Orca OrcaName="Midi" Expand="True" OoUniqId="65e9d953-db08-4bb7-b66e-32e598f3b6a0" CueSheetPaddingSize="2048" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoCueSheet">
+          <Orca OrcaName="Midi" Expand="True" OoUniqId="b0360d43-c14d-438d-9569-38ba1015952a" CueSheetPaddingSize="2048" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoCueSheet">
           <Orca OrcaName="Cue_Note" CueID="1000" SynthType="SynthPolyphonic" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoCueSynthCue">
             <Orca OrcaName="Callback" CallbackId="0" CallbackTag="60" EventStartTime="0" EventEnableFlag="True" EventEndTime="0" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoEventCallback" />
-            <Orca OrcaName="Callback" CallbackId="0" CallbackTag="62" EventStartTime="200" EventEnableFlag="True" EventEndTime="0" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoEventCallback" />
-            <Orca OrcaName="Callback" CallbackId="0" CallbackTag="65" EventStartTime="400" EventEnableFlag="True" EventEndTime="0" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoEventCallback" />
-            <Orca OrcaName="Callback" CallbackId="0" CallbackTag="66" EventStartTime="600" EventEnableFlag="True" EventEndTime="0" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoEventCallback" />
-            <Orca OrcaName="Callback" CallbackId="0" CallbackTag="68" EventStartTime="800" EventEnableFlag="True" EventEndTime="0" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoEventCallback" />
+            <Orca OrcaName="Callback" CallbackId="0" CallbackTag="62" EventStartTime="500" EventEnableFlag="True" EventEndTime="0" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoEventCallback" />
+            <Orca OrcaName="Callback" CallbackId="0" CallbackTag="64" EventStartTime="1500" EventEnableFlag="True" EventEndTime="0" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoEventCallback" />
       <Orca OrcaName="Track" ObjectColor="200, 40, 120, 200" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoCueSynthTrack" />
           </Orca>
           </Orca>

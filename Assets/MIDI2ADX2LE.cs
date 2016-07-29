@@ -8,6 +8,9 @@ public class MIDI2ADX2LE : MonoBehaviour
 
     public string midiFilePath = "MIDI/siokarabushi.mid";
     public int tempo = 1500000;
+    public int resolution = 480;
+
+    List<MidiInfo> midiInfoList = new List<MidiInfo>();
 
     // Use this for initialization
     void Start()
@@ -24,13 +27,8 @@ public class MIDI2ADX2LE : MonoBehaviour
         //  MIDIワークユニット
         {
             MakeAtomCraftDataFromMidi makeAtomCraftDataFromMidi = this.gameObject.AddComponent<MakeAtomCraftDataFromMidi>();
-            List<MidiInfo> noteInfoList = new List<MidiInfo>();
-            noteInfoList.Add(new MidiInfo(0, 60));
-            noteInfoList.Add(new MidiInfo(200, 62));
-            noteInfoList.Add(new MidiInfo(400, 65));
-            noteInfoList.Add(new MidiInfo(600, 66));
-            noteInfoList.Add(new MidiInfo(800, 68));
-            makeAtomCraftDataFromMidi.Make(Path.GetDirectoryName(midiFilePath), Path.GetFileName(midiFilePath), noteInfoList);
+
+            makeAtomCraftDataFromMidi.Make(Path.GetDirectoryName(midiFilePath), Path.GetFileName(midiFilePath), midiInfoList);
         }
     }
 
@@ -101,7 +99,7 @@ public class MIDI2ADX2LE : MonoBehaviour
         //  分解能
         buf = new byte[2];
         readSize = fs.Read(buf, 0, 2);
-        int resolution = (ushort)((int)(buf [0] << 8) + (int)buf [1]);
+        resolution = (ushort)((int)(buf [0] << 8) + (int)buf [1]);
         DebugWrite.DebugWriteText(string.Format("resolution : {0}", resolution.ToString()));
         remain -= readSize;
 
@@ -129,7 +127,7 @@ public class MIDI2ADX2LE : MonoBehaviour
 
         if (chunkSize == 0)
         {
-            DebugWrite.DebugWriteText("ChunkSize == 0!!!");
+            Debug.LogError("ChunkSize == 0!!!");
             remain = 0;
             return;
         }
@@ -150,23 +148,23 @@ public class MIDI2ADX2LE : MonoBehaviour
             {
 
                 int deltaTime = buf [readPoint++];
-                if (deltaTime > 0x80)
+                if (deltaTime >= 0x80)
                 {
                     int deltaTime2 = buf [readPoint++];
-                    if (deltaTime2 > 0x80)
+                    if (deltaTime2 >= 0x80)
                     {
                         int deltaTime3 = buf [readPoint++];
-                        if (deltaTime2 > 0x80)
+                        if (deltaTime3 >= 0x80)
                         {
                             int deltaTime4 = buf [readPoint++];
-                            deltaTime = deltaTime * 0x7f * 0x7f * 0x7f + deltaTime2 * 0x7f * 0x7f + deltaTime3 * 0x7f + deltaTime4;
+                            deltaTime = (deltaTime & 0x7F) * 0x80 * 0x80 * 0x80 + (deltaTime2 & 0x7F) * 0x80 * 0x80 + (deltaTime3 & 0x7F) * 0x80 + deltaTime4;
                         } else
                         {
-                            deltaTime = deltaTime * 0x7f * 0x7f + deltaTime2 * 0x7f + deltaTime3;
+                            deltaTime = (deltaTime & 0x7F)* 0x80 * 0x80 + (deltaTime2 & 0x7F) * 0x80 + deltaTime3;
                         }
                     } else
                     {
-                        deltaTime = deltaTime * 0x7f + deltaTime2;
+                        deltaTime = (deltaTime & 0x7F) * 0x80 + deltaTime2;
                     }
                 }
 
@@ -205,7 +203,7 @@ public class MIDI2ADX2LE : MonoBehaviour
                             text += System.Text.Encoding.ASCII.GetString(eventData);
                         }
 
-                        DebugWrite.DebugWriteText(string.Format("time:{0:00000000} Text : {1}", time, text));
+                        DebugWrite.DebugWriteText(string.Format("time:{0:00000000} Text : {1}", ((float)time/(float)resolution*(float)tempo/1000f), text));
                     } else if (eventType == 0x51)
                     {
                         //  tempo 4byte マイクロ秒単位の４分音符の長さ
@@ -215,7 +213,7 @@ public class MIDI2ADX2LE : MonoBehaviour
                         int eventData3 = buf [readPoint++];
                         tempo = (eventData1 << 16) + (eventData2 << 8) + eventData3; // 07 A1 20 = 500000
 
-                        DebugWrite.DebugWriteText(string.Format("time:{0:00000000} Tempo (microSec) : {1}", time, tempo));
+                        DebugWrite.DebugWriteText(string.Format("time:{0:00000000} Tempo (microSec) : {1}", ((float)time/(float)resolution*(float)tempo/1000f), tempo));
                     } else if (eventType == 0x58)
                     {
                         int eventLength = buf [readPoint++];
@@ -229,14 +227,14 @@ public class MIDI2ADX2LE : MonoBehaviour
                         int eventData3 = buf [readPoint++];
                         int eventData4 = buf [readPoint++];
 
-                        DebugWrite.DebugWriteText(string.Format("time:{0:00000000} {1}/{2} {3} {4}", time, eventData1, System.Math.Pow(2, eventData2), eventData3, eventData4));
+                        DebugWrite.DebugWriteText(string.Format("time:{0:00000000} {1}/{2} {3} {4}", ((float)time/(float)resolution*(float)tempo/1000f), eventData1, System.Math.Pow(2, eventData2), eventData3, eventData4));
                     } else if (eventType == 0x59)
                     {
                         int eventLength = buf [readPoint++];
                         //  Key Signature 2byte
                         int eventData1 = buf [readPoint++];
                         int eventData2 = buf [readPoint++];
-                        DebugWrite.DebugWriteText(string.Format("time:{0:00000000} Key sf : {0} mi : {1} ", time, eventData1, eventData2));
+                        DebugWrite.DebugWriteText(string.Format("time:{0:00000000} Key sf : {0} mi : {1} ", ((float)time/(float)resolution*(float)tempo/1000f), eventData1, eventData2));
 
                     } else
                     {
@@ -246,7 +244,7 @@ public class MIDI2ADX2LE : MonoBehaviour
                         while (eventLength > 0)
                         {
                             int eventData = buf [readPoint++];
-                            DebugWrite.DebugWriteText(string.Format("time:{0:00000000} EventData {1} {2}", time, eventType, eventData));
+                            DebugWrite.DebugWriteText(string.Format("time:{0:00000000} EventData {1} {2}", ((float)time/(float)resolution*(float)tempo/1000f), eventType, eventData));
                             eventLength--;
                         }
                     }
@@ -256,21 +254,29 @@ public class MIDI2ADX2LE : MonoBehaviour
                     int ch = (data & 0x0F);
                     int note = buf [readPoint++];
                     int vel = buf [readPoint++];
-                    DebugWrite.DebugWriteText(string.Format("time:{0:00000000} Note On ch : {1} note : {2} vel : {3} ", time, ch, note, vel));
+                    DebugWrite.DebugWriteText(string.Format("time:{0:00000000} Note On ch : {1} note : {2} vel : {3} ", ((float)time/(float)resolution*(float)tempo/1000f), ch, note, vel));
+
+                    if(vel > 0){
+                        midiInfoList.Add(new MidiInfo((int)((float)time/(float)resolution*(float)tempo/1000f), note)); 
+                    }
+
                 } else if ((data & 0xF0) == 0x80)
                 {
                     //  note off
                     int ch = (data & 0x0F);
                     int note = buf [readPoint++];
                     int vel = buf [readPoint++];
-                    DebugWrite.DebugWriteText(string.Format("time:{0:00000000} Note Off ch : {1} note : {2} vel : {3} ", time, ch, note, vel));
+                    DebugWrite.DebugWriteText(string.Format("time:{0:00000000} Note Off ch : {1} note : {2} vel : {3} ", ((float)time/(float)resolution*(float)tempo/1000f), ch, note, vel));
                 } else if ((data & 0xF0) == 0xB0)
                 {
                     //  ctrl change
                     int ch = (data & 0x0F);
                     int cc = buf [readPoint++];
                     int vv = buf [readPoint++];
-                    DebugWrite.DebugWriteText(string.Format("time:{0:00000000} Ctrl Change ch : {1} cc : {2} vel : {3} ", time, ch, cc, vv));
+                    DebugWrite.DebugWriteText(string.Format("time:{0:00000000} Ctrl Change ch : {1} cc : {2} vel : {3} ", ((float)time/(float)resolution*(float)tempo/1000f), ch, cc, vv));
+                } else {
+
+                    Debug.LogError("Unkown");
                 }
 
             }
