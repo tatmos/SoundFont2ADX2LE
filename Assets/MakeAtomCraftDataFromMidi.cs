@@ -5,9 +5,21 @@ using System.IO;
 using System;
 using System.Security;
 
+/// <summary>
+/// MIDIからの情報
+/// </summary>
+public class MidiInfo
+{
+    public MidiInfo(int _time,int _noteNo)
+    {
+        time= _time;
+        noteNo = _noteNo;
+    }
+    public int time = 0;        //  sequence開始からの時間msec
+    public int noteNo = 60;     //  NoteNo
+};
 
-
-public class MakeAtomCraftData : MonoBehaviour
+public class MakeAtomCraftDataFromMidi : MonoBehaviour
 {
     //  キューに設定するカテゴリ名
     public string defaultGroupCategory = "";
@@ -17,26 +29,25 @@ public class MakeAtomCraftData : MonoBehaviour
     public float pos3dDistanceMax = 50.0f;
     public float pos3dDopplerCoefficient = 0.0f;
 
-    public void Make(string outputPath, string workunitName, List<SF2ADX2LE.Adx2CueSheet> cueSheetList, List<string> fileList, string srcMaterialsFolder)
+    public void Make(string outputPath, string workunitName, List<MidiInfo> noteInfoList)
     {
         #region WorkUnitNameの名前修正
         workunitName = ChangeName(workunitName);
         #endregion
 
-        MakeWorkUnit(outputPath, workunitName, cueSheetList, fileList);
-        CopyMaterialsFolder(outputPath, workunitName, fileList.ToArray(), srcMaterialsFolder);
-
+        MakeWorkUnit(outputPath, workunitName,noteInfoList);
+       
         Debug.Log("<color=orange>Make Atom Craft Data Finish!</color> " + outputPath);
     }
 
-    void MakeWorkUnit(string outputPath, string workunitName, List<SF2ADX2LE.Adx2CueSheet> cueSheetList, List<string> wavList)
+    void MakeWorkUnit(string outputPath, string workunitName, List<MidiInfo> noteInfoList)
     {
         //  情報ファイル作成
-        MakeAtmcunit(outputPath, workunitName, cueSheetList);
-        MakeMaterialinfo(outputPath, workunitName, wavList);
+        MakeAtmcunit(outputPath, workunitName,noteInfoList);
+        MakeMaterialinfo(outputPath, workunitName);
     }
 
-    void MakeAtmcunit(string outputPath, string workunitName, List<SF2ADX2LE.Adx2CueSheet> cueSheetList)
+    void MakeAtmcunit(string outputPath, string workunitName,List<MidiInfo> noteInfoList)
     {
         string filePath = outputPath + "/" + workunitName + "/" + workunitName + ".atmcunit";
 
@@ -68,9 +79,12 @@ public class MakeAtomCraftData : MonoBehaviour
         sw.WriteLine("      <Orca OrcaName=\"CueSheetFolder\" OrcaType=\"CriMw.CriAtomCraft.AcCore.AcOoCueSheetFolder\">");
         sw.WriteLine("        <Orca OrcaName=\"" + workunitName + "\" OrcaType=\"CriMw.CriAtomCraft.AcCore.AcOoCueSheetSubFolder\">");
 
-        foreach (var cuesheet in cueSheetList)
+        SF2ADX2LE.Adx2CueSheet cueSheet = new SF2ADX2LE.Adx2CueSheet();
+        cueSheet.cueSheetName = "Midi";
+
+        //foreach (var cuesheet in cueSheetList)
         {
-            this.CreateCueSheetXML(sw, workunitName, cuesheet);
+            this.CreateCueSheetXML(sw, workunitName, cueSheet,noteInfoList);
         }
 
         sw.WriteLine("        </Orca>");
@@ -95,7 +109,7 @@ public class MakeAtomCraftData : MonoBehaviour
         public int pan;
     };
 
-    void CreateCueSheetXML(StreamWriter sw, string workunitName, SF2ADX2LE.Adx2CueSheet cueSheet)
+    void CreateCueSheetXML(StreamWriter sw, string workunitName, SF2ADX2LE.Adx2CueSheet cueSheet,List<MidiInfo> noteInfoList)
     {
         Guid guid = Guid.NewGuid();
 
@@ -105,48 +119,15 @@ public class MakeAtomCraftData : MonoBehaviour
             + "\" CueSheetPaddingSize=\"2048\" OrcaType=\"CriMw.CriAtomCraft.AcCore.AcOoCueSheet\">");
 
         //  ------ CUE -------
-        //List<string> cueNameList = new List<string>();
 
-        int cueId = 0;
-       
-        for (int noteNo = 0; noteNo < 128; noteNo++)
-        {
-
-            List<Adx2Track> trackList = new List<Adx2Track>();
-            #region track情報収集
-            foreach (var zone in cueSheet.zoneList)
-            {
-                if (zone.keyLow <= noteNo && noteNo <= zone.keyHi)
-                {
-                    Adx2Track track = new Adx2Track();
-                    track.name = zone.name; 
-                    track.materialName = zone.sampleFileName;
-                    track.loopFlag = (zone.sampleMode == 1) ? true : false;
-                    track.pitch = (noteNo - zone.rootKey) * 100;
-                    track.pan = (zone.pan / 500 * 30);
-                    trackList.Add(track);
-                }
-            }
-            #endregion
-            if (trackList.Count > 0)
-            {
-                Debug.Log("track Num Name " + trackList.Count);
-
-                //  キュー名,キューIDはNoteNo
-                string cueName = noteNo.ToString();
-                cueId = noteNo;
-
-                //                if(cueNameList.Contains(cueName))
-                //                {
-                //                    Debug.LogError("Duplicated Name " + cueName);
-                //                } else {
-                //                    cueNameList.Add(cueName);
-                //                }
-
-                this.CreateCueXML(sw, workunitName, cueName, cueId, trackList);
-            }
+        //  --------------------
+        //  MIDI to Callback Cue
+        //  --------------------
+        if(noteInfoList.Count > 0){
+            MakeCallbackCueXml(sw, noteInfoList);
         }
-       
+            
+        //  --------------------
 
         sw.WriteLine("          </Orca>");
 
@@ -211,7 +192,7 @@ public class MakeAtomCraftData : MonoBehaviour
         sw.WriteLine("              </Orca>");
     }
 
-    void MakeMaterialinfo(string outputPath, string workunitName, List<string> wavList)
+    void MakeMaterialinfo(string outputPath, string workunitName)
     {
         string filePath = outputPath + "/" + workunitName + "/" + workunitName + ".materialinfo";
 
@@ -241,10 +222,7 @@ public class MakeAtomCraftData : MonoBehaviour
 
         //  ----- WAV ------
 
-        foreach (string wavName in wavList)
-        {
-            sw.WriteLine("        <Orca OrcaName=\"" + Path.GetFileName(wavName) + "\" OrcaType=\"CriMw.CriAtomCraft.AcCore.AcOoWaveform\" />");
-        }
+
         //  --------------------
 
         sw.WriteLine("      </Orca>");
@@ -256,39 +234,6 @@ public class MakeAtomCraftData : MonoBehaviour
 
         sw.Flush();
         sw.Close();
-    }
-
-    //  波形コピー
-    void CopyMaterialsFolder(string outputPath, string workunitName, string[] fileList, string srcMaterialsPath)
-    {
-        string filePath_materials = outputPath + "/" + workunitName + "/Materials";
-
-        Debug.Log("Copy MaterialFolder Path: " + srcMaterialsPath + " -> " + filePath_materials);
-
-        if (Directory.Exists(Path.GetDirectoryName(filePath_materials)) == false)
-        {
-            Directory.CreateDirectory(Path.GetDirectoryName(filePath_materials));
-        }
-
-        if (Directory.Exists(filePath_materials) == false)
-        {
-            Directory.CreateDirectory(filePath_materials);
-        }
-
-        foreach (string tmpFile in fileList)
-        {
-            if (Path.GetExtension(tmpFile) == ".wav")
-            {
-
-                string filePath = filePath_materials + "/" + Path.GetFileName(tmpFile);
-                if (File.Exists(filePath))
-                {
-                    File.Delete(filePath);
-                }
-
-                File.Copy(tmpFile, filePath);
-            }
-        }
     }
 
     string ChangeName(string name)
@@ -304,4 +249,33 @@ public class MakeAtomCraftData : MonoBehaviour
     }
 
 
+
+    /// <summary>
+    /// MIDIからNoteのタイミングのCallbackのキューを作成
+    /// </summary>
+    void MakeCallbackCueXml(StreamWriter sw, List<MidiInfo> noteInfoList)
+    {
+//    <Orca OrcaName="Cue_Note" CueID="1000" SynthType="SynthPolyphonic" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoCueSynthCue">
+//    <Orca OrcaName="SeqEnd" EventEnableFlag="True" EventEndTime="0" EventStartTime="1200" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoEventOff" />
+//    <Orca OrcaName="Callback" CallbackId="0" CallbackTag="60" EventEnableFlag="True" EventEndTime="0" EventStartTime="0" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoEventCallback" />
+//    <Orca OrcaName="Callback" CallbackId="1" CallbackTag="62" EventEnableFlag="True" EventEndTime="0" EventStartTime="400" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoEventCallback" />
+//    <Orca OrcaName="Callback" CallbackId="2" CallbackTag="65" EventEnableFlag="True" EventEndTime="0" EventStartTime="800" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoEventCallback" />
+//    <Orca OrcaName="Track" ObjectColor="200, 40, 120, 200" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoCueSynthTrack" />
+//    </Orca>
+
+        sw.WriteLine("          <Orca OrcaName=\"Cue_Note\" CueID=\"1000\" SynthType=\"SynthPolyphonic\" OrcaType=\"CriMw.CriAtomCraft.AcCore.AcOoCueSynthCue\">");
+
+        int callbackId = 0;
+        foreach(MidiInfo noteInfo in noteInfoList)
+        {
+            //  コールバック
+            sw.WriteLine("            <Orca OrcaName=\"Callback\"" +
+                " CallbackId=\""+ callbackId +"\" CallbackTag=\"" + noteInfo.noteNo + "\" EventStartTime=\"" + noteInfo.time + "\" " +
+                "EventEnableFlag=\"True\" EventEndTime=\"0\" OrcaType=\"CriMw.CriAtomCraft.AcCore.AcOoEventCallback\" />");
+        }
+        //  空のトラック
+        sw.WriteLine("      <Orca OrcaName=\"Track\" ObjectColor=\"200, 40, 120, 200\" OrcaType=\"CriMw.CriAtomCraft.AcCore.AcOoCueSynthTrack\" />");
+
+        sw.WriteLine("          </Orca>");
+    }
 }

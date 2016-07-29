@@ -404,7 +404,6 @@ public class SF2ADX2LE : MonoBehaviour
 
     void Start()
     {
-        SfToAdx2ConvMain();
     }
 
     /// <summary>
@@ -420,7 +419,7 @@ public class SF2ADX2LE : MonoBehaviour
         return name;
     }
         
-    void SfToAdx2ConvMain()
+    public void SfToAdx2ConvMain()
     {
         string outputPath = Path.GetDirectoryName(Application.dataPath) + "/" + outputpathName + "/";
         DebugWrite.DebugWriteTextReset(outputPath);
@@ -687,13 +686,14 @@ public class SF2ADX2LE : MonoBehaviour
         #endregion
 
         #region ワークユニット作成
-
-        MakeAtomCraftData makeAtomCraftData = this.gameObject.AddComponent<MakeAtomCraftData>();
-
-
         string matelialsPath = outputPath;
 
+        //  音色ワークユニット
+        MakeAtomCraftData makeAtomCraftData = this.gameObject.AddComponent<MakeAtomCraftData>();
+
         makeAtomCraftData.Make(Path.GetDirectoryName(inputPath), workUnitName, cueSheetList, wavefilePathList, matelialsPath);
+
+
 
         #endregion
     }
